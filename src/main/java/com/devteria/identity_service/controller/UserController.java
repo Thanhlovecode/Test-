@@ -35,6 +35,7 @@ public class UserController {
         return userService.findAllUser();
     }
 
+
     @GetMapping("/{id}")
     public UserResponse findUserById(@PathVariable("id") Long id){
         return userService.findUserById(id);
@@ -57,4 +58,10 @@ public class UserController {
     public UserResponse getMyInformation(){
         return userService.getMyInfo();
     }
+
+    @GetMapping
+    public ResponseEntity<String> print(){
+        return ResponseEntity.ok("OKay");
+    }
+
 }

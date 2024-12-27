@@ -32,8 +32,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticateService.refreshToken(request));
     }
 
+
     @PostMapping("/introspect")
     public IntrospectResponse authenticationUser(@RequestBody IntrospectRequest request){
         return authenticateService.introspect(request);
     }
+
+
+
 }
