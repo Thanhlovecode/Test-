@@ -59,9 +59,4 @@ public class UserController {
         return userService.getMyInfo();
     }
 
-    @GetMapping
-    public ResponseEntity<String> print(){
-        return ResponseEntity.ok("OKay");
-    }
-
 }
