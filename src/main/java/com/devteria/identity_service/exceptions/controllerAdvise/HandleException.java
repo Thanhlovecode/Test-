@@ -31,11 +31,12 @@ public class HandleException {
 
     @ExceptionHandler(UserExistedException.class)
     public ResponseEntity<ErrorResponse> handleUserExistException(UserExistedException ex){
+        ErrorCode errorCode = ErrorCode.USER_EXISTED;
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(ex.getMessage())
+                .message(errorCode.getMessage())
                 .detailError("Please rename userName")
                 .build();
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

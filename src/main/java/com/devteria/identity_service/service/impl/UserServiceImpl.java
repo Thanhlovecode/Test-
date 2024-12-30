@@ -2,6 +2,7 @@ package com.devteria.identity_service.service.impl;
 
 import com.devteria.identity_service.constant.PredefinedRole;
 import com.devteria.identity_service.entity.Role;
+import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exceptions.UseNotFoundException;
 import com.devteria.identity_service.exceptions.UserExistedException;
 import com.devteria.identity_service.converter.UserConverter;
@@ -11,7 +12,7 @@ import com.devteria.identity_service.entity.User;
 import com.devteria.identity_service.repository.RoleRepository;
 import com.devteria.identity_service.repository.UserRepository;
 import com.devteria.identity_service.service.UserService;
-import com.devteria.identity_service.utils.StringUtils;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -41,8 +42,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(UserRequest userRequest) {
-        if(!StringUtils.checkString(userRequest.getUsername()) || userRepository.existsByUsernameIgnoreCase(userRequest.getUsername())){
-            throw new UserExistedException("UserName existed or invalid");
+        if(userRepository.existsByUsernameIgnoreCase(userRequest.getUsername())){
+            throw new UserExistedException(ErrorCode.USER_EXISTED.getMessage());
         }
         User user = modelMapper.map(userRequest,User.class);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
