@@ -90,16 +90,21 @@ public class AuthenticationServiceImpl implements AuthenticateService {
                 .build();
     }
 
+
+
     private User getUser(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotExistedException("User not existed"));
     }
+
 
     private void validatePassword(String rawPassword, String encodedPassword) {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new UnAuthenticationException("Authenticated not success");
         }
     }
+
+
 
     private Date getTokenExpiryTime(String token){
         try{

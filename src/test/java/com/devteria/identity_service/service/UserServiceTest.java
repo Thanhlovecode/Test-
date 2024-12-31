@@ -34,13 +34,10 @@ public class UserServiceTest {
     }
 
     @Test
-    void testCreate_WhenUsernameAlreadyExists_ThrowsException() {
+    void testCreate_WhenUsernameAlreadyExists_ThrowsException(){
         Mockito.when(userRepository.existsByUsernameIgnoreCase(userRequest.getUsername()))
                 .thenReturn(true);
 
         assertThrows(UserExistedException.class, () -> userService.createUser(userRequest));
     }
-
-
-
 }

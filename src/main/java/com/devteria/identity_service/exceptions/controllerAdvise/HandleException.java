@@ -48,7 +48,6 @@ public class HandleException {
                 .map(objectError -> objectError.unwrap(ConstraintViolation.class))
                 .map(violation->violation.getConstraintDescriptor().getAttributes())
                 .orElse(null);
-//        log.info(attributes.toString());
         String resultMessage= (attributes!= null) ?
                 Objects.requireNonNull(message).replace("{"+MIN_ATTRIBUTE+"}",
                         String.valueOf(attributes.get(MIN_ATTRIBUTE)))
