@@ -1,4 +1,4 @@
-package com.devteria.identity_service.exceptions.controllerAdvise;
+package com.devteria.identity_service.exceptions.ControllerAdvise;
 
 import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exceptions.*;
@@ -20,8 +20,8 @@ public class HandleException {
 
     private static final String MIN_ATTRIBUTE= "min";
 
-    @ExceptionHandler(UseNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UseNotFoundException ex){
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
                 .detailError("User Not Found: PLease provide other id !!!")

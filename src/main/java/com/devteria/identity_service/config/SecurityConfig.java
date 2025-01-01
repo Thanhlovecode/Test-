@@ -23,7 +23,7 @@ public class SecurityConfig {
 
     private final CustomJwtDecoder customJwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS={"/api/v1/users",
+    private static final String[] PUBLIC_ENDPOINTS={"/api/v1/users",
             "/api/auth/log-in","/api/auth/introspect", "/api/auth/log-out",
             "/api/auth/refresh-token"};
 

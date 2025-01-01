@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 @WebMvcTest(UserController.class)
 @Import(Configuration.class)
-public class UserControllerTest {
+class UserControllerTest {
 
      @Autowired
      MockMvc mockMvc;
@@ -96,7 +96,6 @@ public class UserControllerTest {
     void testCreate_WhenUsernameAlreadyExists_ReturnException() throws Exception {
         Mockito.doThrow(new UserExistedException(ErrorCode.USER_EXISTED.getMessage()))
                 .when(userService).createUser(ArgumentMatchers.any());
-
         mockMvc.perform(MockMvcRequestBuilders.post(END_POINT_PATH)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(userRequest)))

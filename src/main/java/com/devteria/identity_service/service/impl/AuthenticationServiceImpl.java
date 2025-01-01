@@ -42,15 +42,15 @@ public class AuthenticationServiceImpl implements AuthenticateService {
 
     @NonFinal
     @Value("${SIGNER_KEY}")
-    protected String SIGNER_KEY;
+    protected String signerKey;
 
     @NonFinal
     @Value("${VALID_DURATION}")
-    protected Long VALID_DURATION;
+    protected Long validDuration;
 
     @NonFinal
     @Value("${REFRESHABLE_DURATION}")
-    protected Long REFRESHABLE_DURATION;
+    protected Long refreshableDuration;
 
     @Override
     public AuthenticationResponse authenticated(AuthenticationRequest authenticationRequest) {
@@ -116,7 +116,7 @@ public class AuthenticationServiceImpl implements AuthenticateService {
 
     private String validateToken(String token) {
         try {
-            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+            JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
             SignedJWT signedJWT = SignedJWT.parse(token);
             if (!signedJWT.verify(verifier)) {
                 throw new AuthenticationException("",new UnAuthenticationException(ErrorCode.UNAUTHENTICATED.getMessage())) {};
@@ -149,11 +149,11 @@ public class AuthenticationServiceImpl implements AuthenticateService {
     }
 
     private String generateToken(User user) {
-        return generateJWT(user, VALID_DURATION);
+        return generateJWT(user, validDuration);
     }
 
     private String generateRefreshToken(User user) {
-        return generateJWT(user, REFRESHABLE_DURATION);
+        return generateJWT(user, refreshableDuration);
     }
 
     private String generateJWT(User user, Long duration) {
@@ -168,10 +168,10 @@ public class AuthenticationServiceImpl implements AuthenticateService {
                     .jwtID(UUID.randomUUID().toString())
                     .build();
             JWSObject jwsObject = new JWSObject(header, new Payload(claims.toJSONObject()));
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new MACSigner(signerKey.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException ex) {
-            throw new RuntimeException("Error signing the JWT", ex);
+            throw new TokenValidationException("Invalid Token");
         }
     }
 
