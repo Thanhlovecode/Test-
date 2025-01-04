@@ -10,9 +10,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
+
 import java.io.IOException;
+import java.util.Date;
 
 public class JwtAuthenticationEntryPoint  implements AuthenticationEntryPoint {
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException {
@@ -23,9 +26,11 @@ public class JwtAuthenticationEntryPoint  implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         ObjectMapper objectMapper = new ObjectMapper();
         response.getWriter().write(objectMapper.writeValueAsString(ErrorResponse.builder()
+                        .timestamp(new Date())
+                        .status(ErrorCode.UNAUTHENTICATED.getHttpStatus().value())
+                        .error(ErrorCode.UNAUTHENTICATED.getMessage())
                         .message(errorCode.getMessage())
                 .build()));
         response.flushBuffer();
     }
-
 }

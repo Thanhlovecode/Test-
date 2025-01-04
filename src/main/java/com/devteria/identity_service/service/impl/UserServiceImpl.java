@@ -2,9 +2,11 @@ package com.devteria.identity_service.service.impl;
 
 import com.devteria.identity_service.constant.PredefinedRole;
 import com.devteria.identity_service.entity.Role;
+
 import com.devteria.identity_service.enums.ErrorCode;
-import com.devteria.identity_service.exceptions.UserNotFoundException;
 import com.devteria.identity_service.exceptions.UserExistedException;
+import com.devteria.identity_service.exceptions.UserNotFoundException;
+
 import com.devteria.identity_service.converter.UserConverter;
 import com.devteria.identity_service.dto.reponse.UserResponse;
 import com.devteria.identity_service.dto.request.UserRequest;
@@ -16,13 +18,13 @@ import com.devteria.identity_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 
 import java.util.HashSet;
 import java.util.List;
@@ -42,16 +44,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(UserRequest userRequest) {
-        if (userRepository.existsByUsernameIgnoreCase(userRequest.getUsername())) {
-            throw new UserExistedException(ErrorCode.USER_EXISTED.getMessage());
-        }
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         Set<Role> roles = new HashSet<>();
         roleRepository.findById(PredefinedRole.USER_ROLE).ifPresent(roles::add);
         user.setRoles(roles);
-        userRepository.save(user);
-
+        try{
+            userRepository.save(user);
+        } catch(DataIntegrityViolationException exception){
+            throw new UserExistedException(ErrorCode.USER_EXISTED.getMessage());
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -69,7 +71,6 @@ public class UserServiceImpl implements UserService {
         return userConverter.convertUserResponse(userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found")));
     }
-
 
     @Override
     public void updateUser(Long id, UserRequest userRequest) {

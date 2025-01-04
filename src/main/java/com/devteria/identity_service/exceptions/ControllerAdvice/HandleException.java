@@ -1,4 +1,4 @@
-package com.devteria.identity_service.exceptions.ControllerAdvise;
+package com.devteria.identity_service.exceptions.ControllerAdvice;
 
 import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exceptions.*;
@@ -12,49 +12,61 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+
+import java.util.Date;
 import java.util.Objects;
 
 @ControllerAdvice
 @Slf4j
-public class HandleException {
+public class HandleException{
 
     private static final String MIN_ATTRIBUTE= "min";
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex){
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex,WebRequest request){
         ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(new Date())
+                .status(HttpStatus.NOT_FOUND.value())
+                .path(request.getDescription(false).replace("uri=",""))
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .message(ex.getMessage())
-                .detailError("User Not Found: PLease provide other id !!!")
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(UserExistedException.class)
-    public ResponseEntity<ErrorResponse> handleUserExistException(UserExistedException ex){
+    public ResponseEntity<ErrorResponse> handleUserExistException(UserExistedException ex, WebRequest request) {
         ErrorCode errorCode = ErrorCode.USER_EXISTED;
         ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(new Date())
+                .status(errorCode.getHttpStatus().value())
+                .path(request.getDescription(false).replace("uri=",""))
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
                 .message(errorCode.getMessage())
-                .detailError("Please rename userName")
                 .build();
         return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException exception){
-        String message =  (Objects.requireNonNull(exception.getFieldError()).getDefaultMessage());
-       var attributes=exception.getBindingResult().getAllErrors()
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException exception, WebRequest request) {
+        String message = (Objects.requireNonNull(exception.getFieldError()).getDefaultMessage());
+        var attributes = exception.getBindingResult().getAllErrors()
                 .stream()
                 .findFirst()
                 .map(objectError -> objectError.unwrap(ConstraintViolation.class))
-                .map(violation->violation.getConstraintDescriptor().getAttributes())
+                .map(violation -> violation.getConstraintDescriptor().getAttributes())
                 .orElse(null);
-        String resultMessage= (attributes!= null) ?
-                Objects.requireNonNull(message).replace("{"+MIN_ATTRIBUTE+"}",
+        String resultMessage = (attributes != null) ?
+                Objects.requireNonNull(message).replace("{" + MIN_ATTRIBUTE + "}",
                         String.valueOf(attributes.get(MIN_ATTRIBUTE)))
                 : message;
-        ErrorResponse errorResponse= ErrorResponse.builder()
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(new Date())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(resultMessage)
-                .detailError("Error!!!")
                 .build();
         return ResponseEntity.badRequest().body(errorResponse);
     }
@@ -64,15 +76,18 @@ public class HandleException {
     public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotExistedException ex){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
-                .detailError("Error!!!")
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(UnAuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleUnAuthenticationException(UnAuthenticationException ex){
-
+    public ResponseEntity<ErrorResponse> handleUnAuthenticationException(UnAuthenticationException ex
+            , WebRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(new Date())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .path(request.getDescription(false).replace("uri=",""))
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .message(ex.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
@@ -82,7 +97,6 @@ public class HandleException {
     public ResponseEntity<ErrorResponse> handleUnAuthenticationException(TokenValidationException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(ex.getMessage())
-                .detailError("The provide token is invalid")
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }

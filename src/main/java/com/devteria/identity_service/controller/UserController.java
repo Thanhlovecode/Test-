@@ -58,7 +58,4 @@ public class UserController {
     public UserResponse getMyInformation(){
         return userService.getMyInfo();
     }
-
-
-
 }
