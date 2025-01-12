@@ -1,7 +1,7 @@
 package com.devteria.identity_service.service;
 
 import com.devteria.identity_service.converter.UserConverter;
-import com.devteria.identity_service.dto.reponse.UserResponse;
+import com.devteria.identity_service.dto.response.UserResponse;
 import com.devteria.identity_service.dto.request.UserRequest;
 import com.devteria.identity_service.entity.User;
 import com.devteria.identity_service.enums.ErrorCode;

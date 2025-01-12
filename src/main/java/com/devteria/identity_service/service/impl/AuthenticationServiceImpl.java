@@ -1,8 +1,8 @@
 package com.devteria.identity_service.service.impl;
 
 import com.devteria.identity_service.dto.request.*;
-import com.devteria.identity_service.dto.reponse.AuthenticationResponse;
-import com.devteria.identity_service.dto.reponse.IntrospectResponse;
+import com.devteria.identity_service.dto.response.AuthenticationResponse;
+import com.devteria.identity_service.dto.response.IntrospectResponse;
 import com.devteria.identity_service.entity.InvalidatedToken;
 import com.devteria.identity_service.entity.User;
 import com.devteria.identity_service.enums.ErrorCode;
@@ -18,6 +18,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
@@ -51,6 +52,10 @@ public class AuthenticationServiceImpl implements AuthenticateService {
     @NonFinal
     @Value("${REFRESHABLE_DURATION}")
     protected Long refreshableDuration;
+
+    @NonFinal
+    @Value("${RESETTABLE_DURATION}")
+    protected Long resettableDuration;
 
     @Override
     public AuthenticationResponse authenticated(AuthenticationRequest authenticationRequest) {
@@ -104,14 +109,43 @@ public class AuthenticationServiceImpl implements AuthenticateService {
         }
     }
 
-
-
     private Date getTokenExpiryTime(String token){
         try{
             return SignedJWT.parse(token).getJWTClaimsSet().getExpirationTime();
         }catch(ParseException ex){
             throw new TokenValidationException(ErrorCode.TOKEN_INVALID.getMessage());
         }
+    }
+
+    @SneakyThrows
+    @Override
+    public AuthenticationResponse forgotPassword(ForgetPasswordRequest request) {
+        User user= getUser(request.getUsername());
+        String resetToken= generateResetToken(user);
+        String tokenId = validateToken(resetToken);
+        Date expiryTime = getTokenExpiryTime(resetToken);
+        saveToken(tokenId,expiryTime);
+        return AuthenticationResponse.builder()
+                .token(resetToken)
+                .build();
+    }
+
+    @SneakyThrows
+    @Override
+    public void resetPassword(ResetPasswordRequest request) {
+        String resetToken = request.getResetToken();
+        SignedJWT signedJWT = SignedJWT.parse(resetToken);
+        if (signedJWT.getJWTClaimsSet().getExpirationTime().before(new Date())
+                ||!invalidatedRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())
+                || !request.getPassword().equals(request.getConfirmPassword())) {
+            throw new TokenValidationException("token is invalid or password not match ");
+        }
+        User user = getUser(signedJWT.getJWTClaimsSet().getSubject());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+        InvalidatedToken invalidatedToken= invalidatedRepository.findById(signedJWT.getJWTClaimsSet().getJWTID())
+                .orElseThrow(()->new TokenValidationException("token is not found"));
+        invalidatedRepository.delete(invalidatedToken);
     }
 
     private String validateToken(String token) {
@@ -154,6 +188,10 @@ public class AuthenticationServiceImpl implements AuthenticateService {
 
     private String generateRefreshToken(User user) {
         return generateJWT(user, refreshableDuration);
+    }
+
+    private String generateResetToken(User user){
+        return generateJWT(user,resettableDuration);
     }
 
     private String generateJWT(User user, Long duration) {

@@ -1,21 +1,20 @@
 package com.devteria.identity_service.controller;
 
-import com.devteria.identity_service.dto.reponse.AuthenticationResponse;
-import com.devteria.identity_service.dto.reponse.IntrospectResponse;
-import com.devteria.identity_service.dto.request.AuthenticationRequest;
-import com.devteria.identity_service.dto.request.IntrospectRequest;
-import com.devteria.identity_service.dto.request.LogoutRequest;
-import com.devteria.identity_service.dto.request.RefreshRequest;
+import com.devteria.identity_service.dto.request.*;
+import com.devteria.identity_service.dto.response.AuthenticationResponse;
+import com.devteria.identity_service.dto.response.IntrospectResponse;
 import com.devteria.identity_service.service.AuthenticateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthenticateService authenticateService;
+
     @PostMapping("/log-in")
     public AuthenticationResponse authenticationUser(@RequestBody AuthenticationRequest authenticationRequest){
         return authenticateService.authenticated(authenticationRequest);
@@ -32,6 +31,15 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticateService.refreshToken(request));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<AuthenticationResponse> forgotPassword(@RequestBody ForgetPasswordRequest request){
+        return ResponseEntity.ok(authenticateService.forgotPassword(request));
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request){
+        authenticateService.resetPassword(request);
+        return ResponseEntity.ok("Change password successfully");
+    }
 
     @PostMapping("/introspect")
     public IntrospectResponse authenticationUser(@RequestBody IntrospectRequest request){

@@ -1,6 +1,7 @@
 package com.devteria.identity_service.service.impl;
 
 import com.devteria.identity_service.constant.PredefinedRole;
+import com.devteria.identity_service.dto.response.PageResponse;
 import com.devteria.identity_service.entity.Role;
 
 import com.devteria.identity_service.enums.ErrorCode;
@@ -8,10 +9,11 @@ import com.devteria.identity_service.exceptions.UserExistedException;
 import com.devteria.identity_service.exceptions.UserNotFoundException;
 
 import com.devteria.identity_service.converter.UserConverter;
-import com.devteria.identity_service.dto.reponse.UserResponse;
+import com.devteria.identity_service.dto.response.UserResponse;
 import com.devteria.identity_service.dto.request.UserRequest;
 import com.devteria.identity_service.entity.User;
 import com.devteria.identity_service.repository.RoleRepository;
+import com.devteria.identity_service.repository.Specification.UserSpecification;
 import com.devteria.identity_service.repository.UserRepository;
 import com.devteria.identity_service.service.UserService;
 
@@ -19,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,6 +45,25 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
+
+    @Override
+    public PageResponse<?> advanceSearchWithCriteria(int pageNo, int pageSize, String sortBy, String...search) {
+        return userRepository.searchUserByCriteria(pageNo,pageSize,sortBy,search);
+    }
+
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public PageResponse<?> advanceSearchWithSpecification(Pageable pageable,UserRequest userRequest) {
+        Page<User> users = userRepository.findAll(UserSpecification.filter(userRequest),pageable);
+        return PageResponse.builder()
+                .pageNo(pageable.getPageNumber())
+                .pageSize(pageable.getPageSize())
+                .totalElement(users.getTotalElements())
+                .totalPage(users.getTotalPages())
+                .items(users.stream().map(userConverter::convertUserResponse))
+                .build();
+    }
 
     @Override
     public void createUser(UserRequest userRequest) {

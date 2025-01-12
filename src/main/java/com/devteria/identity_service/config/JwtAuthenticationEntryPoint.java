@@ -1,6 +1,6 @@
 package com.devteria.identity_service.config;
 
-import com.devteria.identity_service.dto.reponse.ErrorResponse;
+import com.devteria.identity_service.dto.response.ErrorResponse;
 import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exceptions.TokenValidationException;
 import com.fasterxml.jackson.databind.ObjectMapper;

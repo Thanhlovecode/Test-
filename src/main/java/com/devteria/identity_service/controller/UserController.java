@@ -1,11 +1,13 @@
 package com.devteria.identity_service.controller;
 
-import com.devteria.identity_service.dto.reponse.UserResponse;
+import com.devteria.identity_service.dto.response.ResponseData;
+import com.devteria.identity_service.dto.response.UserResponse;
 import com.devteria.identity_service.dto.request.UserRequest;
 import com.devteria.identity_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,4 +60,30 @@ public class UserController {
     public UserResponse getMyInformation(){
         return userService.getMyInfo();
     }
+
+    @GetMapping("/advance-search-with-criteria")
+    public ResponseEntity<ResponseData<?>> advanceSearchWithCriteria(@RequestParam(defaultValue = "0", required = false) int pageNo,
+                                                       @RequestParam(defaultValue = "20", required = false) int pageSize,
+                                                       @RequestParam(required = false) String sortBy,
+                                                       @RequestParam(defaultValue = "") String... search) {
+        log.info("Request advance search query by criteria");
+        ResponseData<?> responseData= ResponseData.builder()
+                .status(HttpStatus.OK.value())
+                .message("success")
+                .data(userService.advanceSearchWithCriteria(pageNo,pageSize,sortBy,search))
+                .build();
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/specification")
+    public ResponseEntity<ResponseData<?>> advanceSearchWithSpecification(Pageable pageable,
+                                                                          @ModelAttribute UserRequest userRequest){
+       ResponseData<?> responseData = ResponseData.builder()
+               .status(HttpStatus.OK.value())
+               .message("Success")
+               .data(userService.advanceSearchWithSpecification(pageable,userRequest))
+               .build();
+        return ResponseEntity.ok(responseData);
+    }
+
 }

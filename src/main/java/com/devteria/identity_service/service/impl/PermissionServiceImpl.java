@@ -1,6 +1,6 @@
 package com.devteria.identity_service.service.impl;
 
-import com.devteria.identity_service.dto.reponse.PermissionResponse;
+import com.devteria.identity_service.dto.response.PermissionResponse;
 import com.devteria.identity_service.dto.request.PermissionRequest;
 import com.devteria.identity_service.entity.Permission;
 import com.devteria.identity_service.repository.PermissionRepository;

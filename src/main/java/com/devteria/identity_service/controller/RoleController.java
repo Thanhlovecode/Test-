@@ -1,6 +1,6 @@
 package com.devteria.identity_service.controller;
 
-import com.devteria.identity_service.dto.reponse.RoleResponse;
+import com.devteria.identity_service.dto.response.RoleResponse;
 import com.devteria.identity_service.dto.request.RoleRequest;
 import com.devteria.identity_service.service.RoleService;
 import lombok.RequiredArgsConstructor;

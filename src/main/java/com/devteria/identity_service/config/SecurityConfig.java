@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS={"/api/v1/users",
             "/api/auth/log-in","/api/auth/introspect", "/api/auth/log-out",
-            "/api/auth/refresh-token"};
+            "/api/auth/refresh-token","/api/auth/forgot-password","/api/auth/reset-password"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

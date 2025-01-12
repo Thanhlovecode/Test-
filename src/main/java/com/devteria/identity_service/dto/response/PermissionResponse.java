@@ -1,4 +1,4 @@
-package com.devteria.identity_service.dto.reponse;
+package com.devteria.identity_service.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;

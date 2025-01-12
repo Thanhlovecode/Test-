@@ -2,7 +2,7 @@ package com.devteria.identity_service.exceptions.ControllerAdvice;
 
 import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exceptions.*;
-import com.devteria.identity_service.dto.reponse.ErrorResponse;
+import com.devteria.identity_service.dto.response.ErrorResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
